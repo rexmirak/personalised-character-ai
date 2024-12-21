@@ -24,8 +24,7 @@ const Chats = () => {
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
-          const chatData = response.data.chat;
-          console.log(response.data.chat);
+          const chatData = response.data.chat || [];
           const characterNames = Object.keys(chatData).filter((key) => !key.startsWith('user'));
           setCharacters(characterNames.map((name) => ({ name })));
         }

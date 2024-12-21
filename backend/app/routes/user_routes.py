@@ -96,10 +96,17 @@ def createCharacter(character: Character, credentials: HTTPAuthorizationCredenti
 
     file_path = "../backend/database/chats.json"
 
-    # Load existing chats.json
+    # Load existing chats.json or initialize it
     if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            chats_data = json.load(file)
+        try:
+            with open(file_path, 'r') as file:
+                content = file.read().strip()  # Read the file and strip whitespace
+                if not content:  # File is empty
+                    chats_data = []
+                else:
+                    chats_data = json.loads(content)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="Invalid JSON in chats.json")
     else:
         chats_data = []
 
