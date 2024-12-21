@@ -62,28 +62,28 @@ The code adheres to the following styles:
 ## Screenshots
 
 ### Signup Page
-![Signup Page](../readmeScreenshots/signup.png)
+![Signup Page](./readmeScreenshots/signup.png)
 
 ### Login Page
-![Login Page](../readmeScreenshots/login.png)
+![Login Page](./readmeScreenshots/login.png)
 
 ### Landing Page
-![Landing Page](../readmeScreenshots/landing.png)
+![Landing Page](./readmeScreenshots/landing.png)
 
 ### Chats Page
-![Chats Page](../readmeScreenshots/chats.png)
+![Chats Page](./readmeScreenshots/chats.png)
 
 ### Create Character Page
-![Create Character Page](../readmeScreenshots/createCharacter.png)
+![Create Character Page](./readmeScreenshots/createCharacter.png)
 
 ### Chat Page
-![Chat Page](../readmeScreenshots/chat.png)
+![Chat Page](./readmeScreenshots/chat.png)
 
 ### Chat Page 2
-![Chat Page](../readmeScreenshots/chat2.png)
+![Chat Page](./readmeScreenshots/chat2.png)
 
 ### Settings Page
-![Settings Page](../readmeScreenshots/settings.png)
+![Settings Page](./readmeScreenshots/settings.png)
 
 ---
 
