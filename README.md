@@ -15,7 +15,7 @@ Martian Chat was built to explore the seamless integration of AI-powered charact
 **Current Build:** Stable  
 - Backend: Functional FastAPI routes for user authentication, character creation, and AI interaction.  
 - Frontend: Interactive React Native app built with Expo, capable of dynamic updates and smooth user experience.  
-- AI Integration: Fully functional communication with Ollama's `llama3.2:latest` model.
+- AI Integration: Fully functional communication with Meta's `llama3.2:latest` model and runs through Ollama's local APIs
 
 ---
 
@@ -43,7 +43,8 @@ The code adheres to the following styles:
 - **AsyncStorage**: For local storage of user tokens.
 
 ### **AI Integration**:
-- **Ollama**: Using `llama3.2:latest` model to generate intelligent, context-aware character responses.
+- **Model**: Using Meta's `llama3.2:latest` model to generate intelligent, context-aware character responses.
+- **Running the model**: Using Ollama.
 
 ---
 
