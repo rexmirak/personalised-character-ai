@@ -59,6 +59,34 @@ The code adheres to the following styles:
 
 ---
 
+## Screenshots
+
+### Signup Page
+![Signup Page](../readmeScreenshots/signup.png)
+
+### Login Page
+![Login Page](../readmeScreenshots/login.png)
+
+### Landing Page
+![Landing Page](../readmeScreenshots/landing.png)
+
+### Chats Page
+![Chats Page](../readmeScreenshots/chats.png)
+
+### Create Character Page
+![Create Character Page](../readmeScreenshots/createCharacter.png)
+
+### Chat Page
+![Chat Page](../readmeScreenshots/chat.png)
+
+### Chat Page 2
+![Chat Page](../readmeScreenshots/chat2.png)
+
+### Settings Page
+![Settings Page](../readmeScreenshots/settings.png)
+
+---
+
 ## Installation
 
 ### Prerequisites:
