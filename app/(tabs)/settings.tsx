@@ -1,11 +1,12 @@
 import { StyleSheet, Image, Platform } from 'react-native';
-
+import axios from 'axios';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { HelloWave } from '@/components/HelloWave';
 
 export default function TabTwoScreen() {
   return (

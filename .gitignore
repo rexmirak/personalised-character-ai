@@ -1,38 +1,68 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# Node.js and React Native dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Expo
+# Expo specific files
 .expo/
-dist/
-web-build/
+.expo-shared/
+
+# Logs
+*.log
+
+# React Native and Metro Bundler
+.bundle/
+build/
+android/
+ios/
+*.keystore
+.DS_Store
+
+# Generated files
+*.lock
+package-lock.json
 expo-env.d.ts
 
-# Native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
+# TypeScript
 *.tsbuildinfo
 
-app-example
+# Environment variables
+.env
+.env.*
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+.Python
+.env
+.venv/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+dist/
+build/
+
+# FastAPI specific
+*.db
+*.sqlite3
+*.sqlite
+
+# Temporary files and directories
+*.tmp
+*.swp
+*.swo
+*.bak
+*~
+
+# IDE and editor specific
+.vscode/
+.idea/
+*.iml
+
+# Database JSON files
+backend/database/chats.json
+backend/database/users.json
