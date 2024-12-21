@@ -54,6 +54,8 @@ The code adheres to the following styles:
 - **AI Conversations**: Chat with AI characters in real-time with personalized context.
 - **Persistent Chat History**: Save and retrieve conversations locally.
 - **Typing Animation**: Visual feedback while AI generates responses.
+- **Backup**: Export all your chats and save them.
+- **Import Chats**: Import chats and continue using them.
 
 ---
 
