@@ -1,50 +1,182 @@
-# Welcome to your Expo app 👋
+# Martian Chat
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Martian Chat is an offline mobile application featuring a FastAPI-based Python backend and a React Native frontend. It enables users to create and chat with custom AI characters powered by Ollama’s `llama3.2:latest` model, offering a unique conversational experience.
 
-## Get started
+---
 
-1. Install dependencies
+## Motivation
 
+Martian Chat was built to explore the seamless integration of AI-powered character interactions in offline mobile apps. It allows users to design unique characters with specific traits and chat with them in an engaging and dynamic way. The project demonstrates the potential of personalized AI for entertainment, education, and productivity.
+
+---
+
+## Build Status
+
+**Current Build:** Stable  
+- Backend: Functional FastAPI routes for user authentication, character creation, and AI interaction.  
+- Frontend: Interactive React Native app built with Expo, capable of dynamic updates and smooth user experience.  
+- AI Integration: Fully functional communication with Ollama's `llama3.2:latest` model.
+
+---
+
+## Code Style
+
+The code adheres to the following styles:
+- **Python (PEP 8)**: Standard code formatting for Python backend.
+- **React Native**: Clean, modular, and component-based structure with consistent styling conventions.
+
+---
+
+## Tech/Framework Used
+
+### **Backend**:
+- **FastAPI**: For creating robust API endpoints.
+- **Uvicorn**: High-performance ASGI server.
+- **JWT (PyJWT)**: For authentication and authorization.
+- **Requests**: For integrating with Ollama’s API.
+- **JSON**: For managing chat data storage.
+
+### **Frontend**:
+- **React Native**: For building the mobile app.
+- **Expo**: For rapid prototyping and deployment.
+- **Axios**: For handling API calls.
+- **AsyncStorage**: For local storage of user tokens.
+
+### **AI Integration**:
+- **Ollama**: Using `llama3.2:latest` model to generate intelligent, context-aware character responses.
+
+---
+
+## Features
+
+- **User Management**: Secure signup, login, and JWT-based authentication.
+- **Character Creation**: Create and define AI characters with customizable traits.
+- **AI Conversations**: Chat with AI characters in real-time with personalized context.
+- **Persistent Chat History**: Save and retrieve conversations locally.
+- **Typing Animation**: Visual feedback while AI generates responses.
+
+---
+
+## Installation
+
+### Prerequisites:
+- Python 3.8+
+- Node.js 16+
+- npm or Yarn
+- Expo CLI
+- Ollama installed locally and `llama3.2:latest` model downloaded
+
+### Steps:
+1. Clone the repository:
    ```bash
+   git clone https://github.com/username/martian-chat.git
+   cd martian-chat
+   ```
+
+2. Set up the Python backend:
+   ```bash
+   cd backend
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+3. Install Ollama and the required model:
+   ```bash
+   curl -fsSL https://ollama.com/download | sh
+   ollama pull llama3.2:latest
+   ```
+
+4. Set up the React Native frontend:
+   ```bash
+   cd ../frontend
    npm install
    ```
 
-2. Start the app
-
+5. Start the backend server:
    ```bash
-    npx expo start
+   cd ../backend
+   uvicorn app.main:app --host 0.0.0.0 --port 8000
    ```
 
-In the output, you'll find options to open the app in a
+6. Start the Expo server:
+   ```bash
+   cd ../frontend
+   npm start
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+7. Scan the QR code with the Expo Go app to launch the app on your mobile device.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## API References
 
-When you're ready, run:
+### **Base URL**: `http://localhost:8000`
 
-```bash
-npm run reset-project
-```
+#### **Users**
+- **GET /users**: Get a list of all users.
+- **POST /signup**: Register a new user.
+  - Request Body: `{ "username": "string", "password": "string" }`
+- **POST /login**: Log in and retrieve a JWT.
+  - Request Body: `{ "username": "string", "password": "string" }`
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+#### **Character Management**
+- **POST /createCharacter**: Create or update a character.
+  - Request Body:
+    ```json
+    {
+      "name": "string",
+      "background": "string",
+      "physicalDescription": "string",
+      "mannerisms": "string",
+      "knownconnections": "string",
+      "other": "string"
+    }
+    ```
 
-## Learn more
+#### **Chat**
+- **POST /chats**: Retrieve all chat histories for the authenticated user.
+- **GET /getChat**: Retrieve chat history for a specific character.
+  - Query Parameter: `character_name`
+- **POST /sendMessage**: Send a message to a character and receive the AI's response.
+  - Request Body:
+    ```json
+    {
+      "character_name": "string",
+      "message": "string"
+    }
+    ```
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## How to Use
 
-## Join the community
+1. **Create a User**:
+   - Sign up and log in to the app using the authentication endpoints.
 
-Join our community of developers creating universal apps.
+2. **Define a Character**:
+   - Use the `/createCharacter` API or the React Native app interface to create unique AI characters.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. **Start a Conversation**:
+   - Select a character and begin chatting. Messages will be stored locally.
+
+4. **Enjoy AI Conversations**:
+   - Engage in dynamic, context-aware discussions with the AI characters.
+
+---
+
+## Contribute to the Repository
+
+We welcome contributions! To contribute:
+1. Fork the repository.
+2. Create a new branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Make your changes and test thoroughly.
+4. Commit and push your changes:
+   ```bash
+   git commit -m "Add feature description"
+   git push origin feature-name
+   ```
+5. Submit a pull request with a detailed description.
