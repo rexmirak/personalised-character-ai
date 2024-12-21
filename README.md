@@ -43,8 +43,7 @@ The code adheres to the following styles:
 - **AsyncStorage**: For local storage of user tokens.
 
 ### **AI Integration**:
-- **Model**: Using Meta's `llama3.2:latest` model to generate intelligent, context-aware character responses.
-- **Running the model**: Using Ollama.
+- **Model**: Using Meta's `Llama-3.2-3B.Q4_K_M` model to generate intelligent, context-aware character responses.
 
 ---
 
@@ -67,7 +66,7 @@ The code adheres to the following styles:
 - Node.js 16+
 - npm or Yarn
 - Expo CLI
-- Ollama installed locally and `llama3.2:latest` model downloaded
+- `Llama-3.2-3B.Q4_K_M.gguf` model downloaded 
 
 ### Steps:
 1. Clone the repository:
@@ -84,31 +83,27 @@ The code adheres to the following styles:
    pip install -r requirements.txt
    ```
 
-3. Install Ollama and the required model:
-   ```bash
-   curl -fsSL https://ollama.com/download | sh
-   ollama pull llama3.2:latest
    ```
 
-4. Set up the React Native frontend:
+3. Set up the React Native frontend:
    ```bash
    cd ../frontend
    npm install
    ```
 
-5. Start the backend server:
+4. Start the backend server:
    ```bash
    cd ../backend
    uvicorn app.main:app --host 0.0.0.0 --port 8000
    ```
 
-6. Start the Expo server:
+5. Start the Expo server:
    ```bash
    cd ../frontend
    npm start
    ```
 
-7. Scan the QR code with the Expo Go app to launch the app on your mobile device.
+6. Scan the QR code with the Expo Go app to launch the app on your mobile device.
 
 ---
 
