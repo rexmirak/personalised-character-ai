@@ -5,6 +5,7 @@ import {
   Text,
   Alert,
   Platform,
+  TextInput,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
@@ -12,10 +13,12 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
 
 
 export default function TabTwoScreen() {
-  
+  const [persona, setPersona] = useState('');
   const handleImportChats = async () => {
     try {
       // Use DocumentPicker to select a file
@@ -85,6 +88,25 @@ export default function TabTwoScreen() {
     }
   };
 
+  useEffect(() => {
+    // Load the persona from AsyncStorage on mount
+    const loadPersona = async () => {
+      const savedPersona = await AsyncStorage.getItem('userPersona');
+      if (savedPersona) setPersona(savedPersona);
+    };
+    loadPersona();
+  }, []);
+
+  const handleSavePersona = async () => {
+    try {
+      await AsyncStorage.setItem('userPersona', persona);
+      Alert.alert('Success', 'Persona saved successfully!');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save persona.');
+      console.error(error);
+    }
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -99,7 +121,19 @@ export default function TabTwoScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Settings</ThemedText>
       </ThemedView>
-
+      <View style={styles.container}>
+        <Text style={styles.label}>Set Your Persona:</Text>
+        <TextInput
+          style={styles.input}
+          value={persona}
+          onChangeText={setPersona}
+          placeholder="E.g., John is a creative writer"
+          placeholderTextColor="#aaa"
+        />
+        <TouchableOpacity style={styles.saveButton} onPress={handleSavePersona}>
+          <Text style={styles.saveButtonText}>Save Persona</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.buttonContainer}>
         {/* Export Chats Button */}
         <TouchableOpacity
@@ -153,4 +187,35 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  container: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#fff',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    color: '#fff',
+  },
+  saveButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
+

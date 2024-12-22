@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,11 +12,28 @@ const CreateCharacter = () => {
   const [physicalTraits, setPhysicalTraits] = useState('');
   const [mannerisms, setMannerisms] = useState('');
   const [knownConnections, setKnownConnections] = useState('');
+  const [other, setOther] = useState('');
+  const [persona, setPersona] = useState('');
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
 
   const router = useRouter();
   const navigation = useNavigation();
+  // Fetch persona from AsyncStorage
+  useEffect(() => {
+    const fetchPersona = async () => {
+      try {
+        const storedPersona = await AsyncStorage.getItem('userPersona');
+        setPersona(storedPersona || ''); // Default to an empty string if no persona is found
+      } catch (error) {
+        console.error('Error fetching persona:', error);
+      } finally {
+        setIsLoading(false); // Mark loading as complete
+      }
+    };
 
-  // Set header title dynamically
+    fetchPersona();
+  }, []);
+    // Set header title dynamically
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Create Character', // Update the header title
@@ -40,6 +57,7 @@ const CreateCharacter = () => {
           physicalDescription: physicalTraits,
           mannerisms,
           knownconnections: knownConnections,
+          persona: persona || '', // Pass persona
           other: 'Other details about the character',
         },
         {
@@ -58,7 +76,7 @@ const CreateCharacter = () => {
 
   // Handle form submission
   const handleCreate = async () => {
-    if (name && background && physicalTraits && mannerisms && knownConnections) {
+    if (name && background && physicalTraits && mannerisms && knownConnections && other) {
       try {
         const response = await createCharacter();
         Alert.alert('Success', response.message);
@@ -81,8 +99,11 @@ const CreateCharacter = () => {
         colors={['#0F2027', '#203A43', '#2C5364']} // Modern dark gradient colors
         style={styles.gradientContainer}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Create Character</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false} // Optional: Hides the scrollbar
+        >          
+        <Text style={styles.title}>Create Character</Text>
           <TextInput
             style={styles.inputShort}
             placeholder="Name"
@@ -122,7 +143,19 @@ const CreateCharacter = () => {
             onChangeText={setKnownConnections}
             multiline
           />
+          <TextInput
+            style={styles.inputLong}
+            placeholder="other"
+            placeholderTextColor="#aaa"
+            value={other}
+            onChangeText={setOther}
+            multiline
+          />
           <Button title="Create Character" onPress={handleCreate} />
+          {/* Add margin to ensure button is visible */}
+          <View style={styles.buttonContainer}>
+            <Button title="Create Character" onPress={handleCreate} />
+          </View>
         </ScrollView>
       </LinearGradient>
     </KeyboardAvoidingView>
@@ -136,11 +169,6 @@ const styles = StyleSheet.create({
   },
   gradientContainer: {
     flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 16,
-    paddingTop: 50,
   },
   title: {
     fontSize: 26,
@@ -170,6 +198,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     height: 100, // Adjusted for longer input
     textAlignVertical: 'top',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 16,
+    paddingTop: 50,
+    paddingBottom: 50, // Add padding to prevent the button from being hidden
+  },
+  buttonContainer: {
+    marginTop: 16, // Add spacing above the button
   },
 });
 
