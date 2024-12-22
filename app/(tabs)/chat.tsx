@@ -9,7 +9,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard'; 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,6 +33,49 @@ const ChatPage: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false); // State to track typing animation
   const flatListRef = useRef<FlatList>(null);
+  const [longPressedMessage, setLongPressedMessage] = useState<Message | null>(null); // Track the selected message for the menu
+  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
+
+  // Long press handler
+  const handleLongPress = (message: Message) => {
+    setLongPressedMessage(message);
+    setModalVisible(true); // Show the modal
+  };
+
+  // Delete message handler
+  const deleteMessage = async (message: Message) => {
+    try {
+      console.log("Deleting message:", message); // Debug log for the payload
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) throw new Error('User not authenticated');
+      if (!characterName) throw new Error('Character name is missing');
+
+      await axios.post(
+        `${API_URL}/deleteMessage`,
+        { "character_name": characterName, "message":message },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setMessages((prevMessages) =>
+        prevMessages.filter(
+          (msg) => !(msg.role === message.role && msg.content === message.content)
+        )
+      );
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
+  };
+
+  // Copy message handler
+  const copyMessage = async (message: Message) => {
+    await Clipboard.setStringAsync(message.content);
+    Alert.alert('Copied', 'Message copied to clipboard');
+  };
 
   // Fetch chat messages from the backend
   useEffect(() => {
@@ -121,14 +168,16 @@ const ChatPage: React.FC = () => {
   }, [messages, isTyping]);
 
   const renderMessage = ({ item }: { item: Message }) => (
-    <View
-      style={[
-        styles.messageBubble,
-        item.role === 'user' ? styles.userMessage : styles.assistantMessage,
-      ]}
-    >
-      <Text style={styles.messageText}>{item.content}</Text>
-    </View>
+    <TouchableWithoutFeedback onLongPress={() => handleLongPress(item)}>
+      <View
+        style={[
+          styles.messageBubble,
+          item.role === 'user' ? styles.userMessage : styles.assistantMessage,
+        ]}
+      >
+        <Text style={styles.messageText}>{item.content}</Text>
+      </View>
+    </TouchableWithoutFeedback>
   );
 
   return (
@@ -179,8 +228,43 @@ const ChatPage: React.FC = () => {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
-  );
+
+      {/* Modal for long press menu */}
+      {modalVisible && longPressedMessage && (
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalMenu}>
+                <TouchableOpacity
+                  style={styles.menuOption}
+                  onPress={() => {
+                    deleteMessage(longPressedMessage);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.menuText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuOption}
+                  onPress={() => {
+                    copyMessage(longPressedMessage);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.menuText}>Copy</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+      )}
+    </KeyboardAvoidingView>  );
+  
 };
 
 const styles = StyleSheet.create({
@@ -268,6 +352,28 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#FFF',
     fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalMenu: {
+    backgroundColor: '#D3D3D3',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  menuOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#aaa',
+  },
+  menuText: {
+    fontSize: 18,
+    color: '#000',
   },
 });
 

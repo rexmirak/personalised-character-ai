@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List
+from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException, Header
 from fastapi import security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -229,6 +229,54 @@ def get_chat(character_name: str, credentials: HTTPAuthorizationCredentials = De
         raise HTTPException(status_code=404, detail=f"No chat history found for {character_name}")
 
     return {"messages": character_chat}
+
+@router.post("/deleteMessage")
+def delete_message(request: Dict[str, Any], credentials: HTTPAuthorizationCredentials = Depends(security)):
+    character_name = request.get("character_name")
+    message_to_delete = request.get("message")
+
+    if not character_name or not message_to_delete:
+        raise HTTPException(status_code=422, detail="Invalid request payload")    
+    
+    user_token = credentials.credentials
+    username = decode_jwt(user_token)["sub"]  # Decode JWT to get the username
+
+    if not username:
+        raise HTTPException(status_code=401, detail="Invalid token or user not found")
+
+    file_path = "../backend/database/chats.json"
+
+    # Check if chats.json exists
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Chats file not found")
+
+    # Load chats.json
+    with open(file_path, 'r') as file:
+        chats_data = json.load(file)
+
+    # Find user entry
+    user_entry = next((entry for entry in chats_data if entry.get("username") == username), None)
+    if not user_entry:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Find character's chat
+    if character_name not in user_entry:
+        raise HTTPException(status_code=404, detail=f"No chat history found for {character_name}")
+
+    # Remove the specific message
+    updated_chat = [
+        msg for msg in user_entry[character_name]
+        if not (msg["role"] == message_to_delete["role"] and msg["content"] == message_to_delete["content"])
+    ]
+
+    user_entry[character_name] = updated_chat
+
+    # Save updated chat history
+    with open(file_path, 'w') as file:
+        json.dump(chats_data, file, indent=4)
+
+    return {"message": "Message deleted successfully"}
+
 
 #using llama cpp
 @router.post("/sendMessage")

@@ -24,7 +24,9 @@
     "axios": "^1.7.9",
     "expo": "~52.0.18",
     "expo-blur": "~14.0.1",
+    "expo-clipboard": "^7.0.0",
     "expo-constants": "~17.0.3",
+    "expo-document-picker": "~13.0.1",
     "expo-font": "~13.0.1",
     "expo-haptics": "~14.0.0",
     "expo-linear-gradient": "~14.0.1",
@@ -45,8 +47,7 @@
     "react-native-screens": "~4.1.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "13.12.5",
-    "expo-document-picker": "~13.0.1"
+    "react-native-webview": "13.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
