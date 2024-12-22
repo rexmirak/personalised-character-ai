@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { API_URL } from '@/constants/api';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as FileSystem from 'expo-file-system';
 
 const Chats = () => {
   const [characters, setCharacters] = useState<{ name: string }[]>([]);
@@ -38,6 +39,12 @@ const Chats = () => {
     fetchChats();
   }, []);
 
+  const getAvatarUri = async (characterName: string) => {
+    const avatarPath = FileSystem.documentDirectory + `assets/images/${characterName}.png`;
+    const fileInfo = await FileSystem.getInfoAsync(avatarPath);
+    return fileInfo.exists ? avatarPath : require('@/assets/images/avatar.png');
+  };
+
   return (
     <LinearGradient
       colors={['#0F2027', '#203A43', '#2C5364']} // Modern dark gradient colors
@@ -57,7 +64,8 @@ const Chats = () => {
                 onPress={() => router.push({ pathname: '/chat', params: { characterName: item.name } })}
               >
                 <Image
-                  source={{ uri: 'https://via.placeholder.com/50' }} // Replace with real avatars
+                  source={require('@/assets/images/avatar.png')}                   
+                  defaultSource={require('@/assets/images/avatar.png')}
                   style={styles.avatar}
                 />
                 <Text style={styles.characterName}>{item.name}</Text>
@@ -69,7 +77,7 @@ const Chats = () => {
                 onPress={() => router.push('/createCharacter')}
               >
                 <Image
-                  source={{ uri: 'https://via.placeholder.com/50' }} // Replace with a "+" icon
+                  source={require('@/assets/images/avatar.png')} // Replace with your "+" icon
                   style={styles.avatar}
                 />
                 <Text style={styles.addNewText}>Add New</Text>

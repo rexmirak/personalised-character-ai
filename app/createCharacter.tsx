@@ -1,10 +1,12 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL } from '@/constants/api';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 
 const CreateCharacter = () => {
   const [name, setName] = useState('');
@@ -15,6 +17,7 @@ const CreateCharacter = () => {
   const [other, setOther] = useState('');
   const [persona, setPersona] = useState('');
   const [isLoading, setIsLoading] = useState(true); // Track loading state
+  const [avatarUri, setAvatarUri] = useState<string>('/assets/images/avatar.png'); // Default to the string type
 
   const router = useRouter();
   const navigation = useNavigation();
@@ -41,6 +44,40 @@ const CreateCharacter = () => {
     });
   }, [navigation]);
 
+  // Function to upload avatar
+  const uploadAvatar = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'image/*',
+      });
+  
+      // Check if the result has the required properties
+      if ('uri' in result && 'name' in result && result.uri && result.name) {
+        const uri = result.uri as string; // Ensure 'uri' is a string
+        const name = result.name as string; // Explicitly cast 'name' to a string
+  
+        const fileExtension = name.split('.').pop(); // Extract file extension
+        const newAvatarPath = `${FileSystem.documentDirectory}assets/images/${name}.${fileExtension}`;
+  
+        // Ensure the directory exists
+        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'assets/images', { intermediates: true });
+  
+        // Move the selected file to the assets/images directory
+        await FileSystem.copyAsync({
+          from: uri,
+          to: newAvatarPath,
+        });
+  
+        setAvatarUri(newAvatarPath); // Update the avatar URI state
+      } else {
+        console.log('DocumentPicker canceled or returned an invalid result');
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      Alert.alert('Error', 'Failed to upload avatar. Please try again.');
+    }
+  };
+  
   // Function to create a new character
   const createCharacter = async () => {
     try {
@@ -104,6 +141,10 @@ const CreateCharacter = () => {
           showsVerticalScrollIndicator={false} // Optional: Hides the scrollbar
         >          
         <Text style={styles.title}>Create Character</Text>
+          {/* Avatar Section */}
+          <TouchableOpacity onPress={uploadAvatar}>
+            <Image source={require('@/assets/images/avatar.png')} style={styles.avatar} />
+          </TouchableOpacity>
           <TextInput
             style={styles.inputShort}
             placeholder="Name"
@@ -151,7 +192,6 @@ const CreateCharacter = () => {
             onChangeText={setOther}
             multiline
           />
-          <Button title="Create Character" onPress={handleCreate} />
           {/* Add margin to ensure button is visible */}
           <View style={styles.buttonContainer}>
             <Button title="Create Character" onPress={handleCreate} />
@@ -167,6 +207,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1E1E1E',
   },
+  avatar: { width: 100, height: 100, borderRadius: 50, alignSelf: 'center', marginBottom: 16 },
   gradientContainer: {
     flex: 1,
   },
