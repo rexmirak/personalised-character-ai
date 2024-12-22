@@ -35,6 +35,9 @@ const ChatPage: React.FC = () => {
   const flatListRef = useRef<FlatList>(null);
   const [longPressedMessage, setLongPressedMessage] = useState<Message | null>(null); // Track the selected message for the menu
   const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
+  const [editMode, setEditMode] = useState(false); // Tracks if the edit popup is open
+  const [editText, setEditText] = useState(''); // Holds the text being edited
+
 
   // Long press handler
   const handleLongPress = (message: Message) => {
@@ -120,7 +123,40 @@ const ChatPage: React.FC = () => {
 
     fetchChat();
   }, [characterName]);
-
+    // Edit message handler
+    const editMessage = async () => {
+      if (!longPressedMessage || editText.trim() === '') return;
+  
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) throw new Error('User not authenticated');
+        if (!characterName) throw new Error('Character name is missing');
+  
+        await axios.post(
+          `${API_URL}/editMessage`,
+          { character_name: characterName, old_message: longPressedMessage, new_content: editText },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+  
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.id === longPressedMessage.id ? { ...msg, content: editText } : msg
+          )
+        );
+  
+        setEditMode(false);
+        setEditText('');
+        setLongPressedMessage(null);
+      } catch (error) {
+        console.error('Error editing message:', error);
+      }
+    };
+  
   const handleSendMessage = async () => {
     if (inputText.trim() === '') return;
 
@@ -243,6 +279,16 @@ const ChatPage: React.FC = () => {
                 <TouchableOpacity
                   style={styles.menuOption}
                   onPress={() => {
+                    setEditMode(true);
+                    setEditText(longPressedMessage.content);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.menuText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuOption}
+                  onPress={() => {
                     deleteMessage(longPressedMessage);
                     setModalVisible(false);
                   }}
@@ -263,8 +309,35 @@ const ChatPage: React.FC = () => {
           </TouchableWithoutFeedback>
         </Modal>
       )}
-    </KeyboardAvoidingView>  );
-  
+
+      {/* Modal for editing message */}
+      {editMode && (
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={editMode}
+          onRequestClose={() => setEditMode(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setEditMode(false)}>
+            <View style={styles.modalOverlay}>
+              <View style={styles.editModal}>
+                <TextInput
+                  style={styles.editModalTextInput} // Use the dedicated style for the edit modal                  
+                  value={editText}
+                  onChangeText={setEditText}
+                  placeholder="Edit message..."
+                  placeholderTextColor="#555"
+                />
+                <TouchableOpacity onPress={editMessage} style={styles.editButton}>
+                  <Text style={styles.sendButtonText}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+      )}
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -374,6 +447,35 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 18,
     color: '#000',
+  },
+  editModal: {
+    width: '90%',
+    maxHeight: '66%',
+    backgroundColor: '#D3D3D3',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    alignSelf: 'center',
+    justifyContent: 'center',
+  },  
+  editButton: {
+    marginTop: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+  },
+  editModalTextInput: {
+    width: '100%',
+    height: 40,
+    backgroundColor: '#F0F0F0', // Light grey background for better contrast
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    color: '#000', // Black text color for visibility
+    fontSize: 16,
+    marginBottom: 10, // Spacing between the input and the button
+    borderWidth: 1,
+    borderColor: '#CCC', // Subtle border for clarity
   },
 });
 

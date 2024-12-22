@@ -277,6 +277,44 @@ def delete_message(request: Dict[str, Any], credentials: HTTPAuthorizationCreden
 
     return {"message": "Message deleted successfully"}
 
+@router.post("/editMessage")
+def edit_message(request: Dict[str, Any], credentials: HTTPAuthorizationCredentials = Depends(security)):
+    character_name = request.get("character_name")
+    old_message = request.get("old_message")
+    new_content = request.get("new_content")
+
+    if not character_name or not old_message or not new_content:
+        raise HTTPException(status_code=400, detail="Invalid request payload")
+
+    file_path = "../backend/database/chats.json"
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Chats file not found")
+
+    with open(file_path, 'r') as file:
+        chats_data = json.load(file)
+
+    user_entry = next((entry for entry in chats_data if entry.get("username") == decode_jwt(credentials.credentials)["sub"]), None)
+
+    if not user_entry:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if character_name not in user_entry:
+        raise HTTPException(status_code=404, detail=f"No chat history found for {character_name}")
+
+    character_chat = user_entry[character_name]
+
+    for message in character_chat:
+        if message["role"] == old_message["role"] and message["content"] == old_message["content"]:
+            message["content"] = new_content
+            break
+    else:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    with open(file_path, 'w') as file:
+        json.dump(chats_data, file, indent=4)
+
+    return {"message": "Message updated successfully"}
 
 #using llama cpp
 @router.post("/sendMessage")
