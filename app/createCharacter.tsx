@@ -7,6 +7,7 @@ import axios from 'axios';
 import { API_URL } from '@/constants/api';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
+import { createCharacter } from '@/services/userServices';
 
 const CreateCharacter = () => {
   const [name, setName] = useState('');
@@ -79,32 +80,25 @@ const CreateCharacter = () => {
   };
   
   // Function to create a new character
-  const createCharacter = async () => {
+  const newCharacter = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      if (!token) {
+      const username = await AsyncStorage.getItem('username');
+      if (!username) {
         throw new Error('User not authenticated');
       }
 
-      const response = await axios.post(
-        `${API_URL}/createCharacter`,
+      const response = await createCharacter(
         {
-          name,
-          background,
+          name:name,
+          background:background,
           physicalDescription: physicalTraits,
-          mannerisms,
+          mannerisms:mannerisms,
           knownconnections: knownConnections,
           persona: persona || '', // Pass persona
-          other: 'Other details about the character',
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+          other:other
+        },username
       );
-
-      return response.data;
+      return response.message;
     } catch (error) {
       console.error('Error creating character:', error);
       throw error;
@@ -115,8 +109,8 @@ const CreateCharacter = () => {
   const handleCreate = async () => {
     if (name && background && physicalTraits && mannerisms && knownConnections && other) {
       try {
-        const response = await createCharacter();
-        Alert.alert('Success', response.message);
+        const response = await newCharacter();
+        Alert.alert('Success', response);
         router.push('/chats');
       } catch (error) {
         Alert.alert('Error', 'Failed to create character. Please try again.');

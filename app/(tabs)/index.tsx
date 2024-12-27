@@ -1,11 +1,31 @@
 import { Image, StyleSheet, Platform } from 'react-native';
-
+import React, { useState, useEffect } from 'react';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        if (storedUsername) {
+          setUsername(storedUsername);
+          console.log('Fetched username:', storedUsername); // Logs the actual username
+        } else {
+          console.log('No username found in AsyncStorage');
+        }
+      } catch (error) {
+        console.error('Error fetching username:', error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -16,7 +36,10 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome To Martian Chat!</ThemedText>
+        <ThemedText type="title">{username
+          ? `Welcome, ${username}, to Martian Chat!`
+          : 'Welcome To Martian Chat!'}
+          </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle"></ThemedText>

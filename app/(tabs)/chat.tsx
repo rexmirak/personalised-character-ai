@@ -45,6 +45,58 @@ const ChatPage: React.FC = () => {
     setModalVisible(true); // Show the modal
   };
 
+    // Function to regenerate a response
+    const regenerateResponse = async (message: Message) => {
+          // Check if the message is sent by the user
+    if (message.role === 'user') {
+      Alert.alert('Action Not Allowed', 'You cannot regenerate a user-sent message.');
+      return; // Exit the function
+    }
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) throw new Error('User not authenticated');
+        if (!characterName) throw new Error('Character name is missing');
+  
+        setIsTyping(true);
+  
+        // Delete the previous assistant response
+        setMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg.id !== message.id)
+        );
+  
+        // Regenerate the response
+        const response = await axios.post(
+          `${API_URL}/regenerate`,
+          {
+            character_name: characterName,
+            previous_message: message.content, // Previous message content
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+  
+        const regeneratedMessage: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: response.data.message,
+        };
+        console.log(regenerateResponse)
+        // Add the regenerated response to the messages
+        setMessages((prevMessages) => [...prevMessages, regeneratedMessage]);
+      } catch (error) {
+        console.error('Error regenerating response:', error);
+        Alert.alert('Error', 'Failed to regenerate response. Please try again.');
+      } finally {
+        setIsTyping(false);
+      }
+    };
+  
+  
+
   // Delete message handler
   const deleteMessage = async (message: Message) => {
     try {
@@ -276,6 +328,15 @@ const ChatPage: React.FC = () => {
           <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalMenu}>
+                <TouchableOpacity
+                  style={styles.menuOption}
+                  onPress={() => {
+                    regenerateResponse(longPressedMessage);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.menuText}>Regenerate Response</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.menuOption}
                   onPress={() => {

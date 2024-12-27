@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import { API_URL } from '../constants/api';
 import { useRouter } from 'expo-router';
+import { signup } from '@/services/userServices';
 
 export default function SignUpScreen() {
   const [username, setUsername] = useState('');
@@ -27,29 +28,15 @@ export default function SignUpScreen() {
     setLoading(true);
     try {
       // Make the signup request
-      const response = await axios.post(`${API_URL}/signup`, { username, password });
-      
+      const result = await signup({ username: username, password: password });
       // Success alert
       Alert.alert('Success', 'Account created successfully!');
       router.replace('/login'); // Redirect to login screen
 
-    } catch (error) {
-      setLoading(false);
-
-      // Handle backend error responses
-      if (axios.isAxiosError(error) && error.response) {
-        const { detail } = error.response.data;
-
-        // Show the error alert returned from backend
-        if (detail) {
-          Alert.alert('Signup Failed', detail);
-        } else {
-          Alert.alert('Error', 'An error occurred while signing up');
-        }
-      } else {
-        // General error alert
+    } catch (error:any) {
+        setLoading(false);
+        console.error(error.message);
         Alert.alert('Error', 'An unexpected error occurred. Please try again.');
-      }
     } finally {
       setLoading(false);
     }

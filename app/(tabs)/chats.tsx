@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { API_URL } from '@/constants/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as FileSystem from 'expo-file-system';
+import { getChats } from '@/services/userServices';
 
 const Chats = () => {
   const [characters, setCharacters] = useState<{ name: string }[]>([]);
@@ -17,17 +18,15 @@ const Chats = () => {
     const fetchChats = async () => {
       try {
         setLoading(true);
-        const token = await AsyncStorage.getItem('userToken');
-        if (token) {
-          const response = await axios.post(
-            `${API_URL}/chats`,
-            {},
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          const chatData = response.data.chat || [];
-          const characterNames = Object.keys(chatData).filter((key) => !key.startsWith('user'));
+        const username = await AsyncStorage.getItem('username');
+        if (username) {
+          const response = await getChats(username);
+          
+          const chatData = response.chat || [];
+          const characterNames = Object.keys(chatData["characters"]).filter((key) => !key.startsWith('user'));
           setCharacters(characterNames.map((name) => ({ name })));
+        }else{
+          throw new Error('User not authenticated');
         }
       } catch (error) {
         console.error('Error fetching chats:', error);

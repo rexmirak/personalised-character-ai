@@ -98,6 +98,56 @@ def login(user:User):
                 return "Error loading users file @ ../backend/database/chats.json"
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
+@router.post("/regenerate")
+def regenerate_message(request: Dict[str, str], credentials: HTTPAuthorizationCredentials = Depends(security)):
+    print(request)
+    user_token = credentials.credentials
+    username = decode_jwt(user_token)["sub"]
+
+    if not username:
+        raise HTTPException(status_code=401, detail="Invalid token or user not found")
+
+    character_name = request.get("character_name")
+    previous_message = request.get("previous_message")
+
+    if not character_name or not previous_message:
+        raise HTTPException(status_code=400, detail="Missing character_name or previous_message")
+
+    # Load character-specific chat data
+    file_path = "../backend/database/chats.json"
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Chat history not found")
+
+    with open(file_path, "r") as file:
+        chats_data = json.load(file)
+
+    user_entry = next((entry for entry in chats_data if entry["username"] == username), None)
+    if not user_entry or character_name not in user_entry:
+        raise HTTPException(status_code=404, detail="Character chat history not found")
+
+    chat_history = user_entry[character_name]
+
+    # Generate new response using the LLM
+    formatted_messages = [
+        {"role": msg["role"], "content": msg["content"]}
+        for msg in chat_history if msg["content"] != previous_message
+    ]
+
+    try:
+        response = llm.create_chat_completion(
+            messages=formatted_messages,
+            max_tokens=512,  # Reduce max_tokens to limit the length
+            temperature=0.7,  # Adjust temperature for less randomness
+            top_p=0.8,
+            stop=["</s>", "<|eot|>","\n\n","<|endoftext|>"],  # Simplified stop sequences
+        )
+
+        llm_reply = response["choices"][0]["message"]["content"].strip()
+
+        return {"message": llm_reply.strip()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"LLM Error: {str(e)}")
+
 @router.post("/createCharacter")
 def createCharacter(character: Character, credentials: HTTPAuthorizationCredentials = Depends(security)):
     user_token = credentials.credentials
@@ -367,19 +417,19 @@ def send_message(request: SendMessageRequest, credentials: HTTPAuthorizationCred
     ]
 
     # Truncate the context if necessary
-    max_context_length = 2048  # Adjust this value as needed
+    max_context_length = 4056  # Adjust this value as needed
     formatted_messages = formatted_messages[-max_context_length:]
-
+    print(formatted_messages)
     try:
         # Generate a response using Llama's create_chat_completion
         response = llm.create_chat_completion(
             messages=formatted_messages,
             max_tokens=512,  # Reduce max_tokens to limit the length
-            temperature=0.6,  # Adjust temperature for less randomness
+            temperature=0.7,  # Adjust temperature for less randomness
             top_p=0.8,
-            stop=["</s>", "<|eot|>"],  # Simplified stop sequences
+            stop=["</s>", "<|eot|>","\n\n","<|endoftext|>"],  # Simplified stop sequences
         )
-        print("LLM Raw Response:", response)
+        # print("LLM Raw Response:", response)
 
         if "choices" not in response or not response["choices"]:
             raise HTTPException(status_code=500, detail="No choices in LLM response")
@@ -392,8 +442,6 @@ def send_message(request: SendMessageRequest, credentials: HTTPAuthorizationCred
         cleaned_reply = ". ".join(
             [sentence for sentence in sentences if sentence not in seen and not seen.add(sentence)]
         )
-
-        print("Cleaned LLM Reply:", cleaned_reply)
 
         if not cleaned_reply:
             raise HTTPException(status_code=500, detail="No valid content returned by LLM")
@@ -492,6 +540,7 @@ def send_message(request: SendMessageRequest, credentials: HTTPAuthorizationCred
 
 #     except requests.RequestException as e:
 #         raise HTTPException(status_code=500, detail=f"Error communicating with LLM: {str(e)}")
+
 
 ###### helper
 

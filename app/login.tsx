@@ -13,6 +13,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthContext from '../hooks/useAuth';
 import { API_URL } from '../constants/api';
 import { router, useRouter } from 'expo-router';
+import { signin } from '@/services/userServices';
+
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
@@ -28,28 +30,19 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/login`, {
-        username,
-        password,
-      });
+      const result = await signin({ username, password });
+      Alert.alert('Success', result.message);
 
-      const { token } = response.data;
-      console.log(response.data)
-      if(!token){
+      if(!result.username){
         return
       }
-      await AsyncStorage.setItem('userToken', token);
+
+      await AsyncStorage.setItem('username', result.username);
       setIsSignedIn(true);
       router.replace('/'); // Redirect to index
-    } catch (error:unknown) {
-      if (axios.isAxiosError(error) && error.response) {
-        Alert.alert(
-          'Error',
-          error.response.data?.message || 'An error occurred while logging in'
-        );
-      } else {
-        Alert.alert('Error', 'An unexpected error occurred');
-      }
+    } catch (error: any) {
+      console.error('Sign-in error:', error.message);
+      Alert.alert('Login Failed', error.message);
     } finally {
       setLoading(false);
     }
